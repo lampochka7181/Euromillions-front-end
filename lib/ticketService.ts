@@ -1,3 +1,5 @@
+import { getApiUrl } from './utils'
+
 export interface TicketActivity {
   id: string
   date: string
@@ -24,7 +26,7 @@ export class TicketService {
     try {
       console.log('Fetching tickets from backend API...')
       
-      const response = await fetch('http://localhost:3001/tickets/my', {
+      const response = await fetch(`${getApiUrl()}/tickets/my`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +65,7 @@ export class TicketService {
     try {
       console.log('Fetching jackpot from backend API...')
       
-      const response = await fetch('http://localhost:3001/pot', {
+      const response = await fetch(`${getApiUrl()}/pot`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

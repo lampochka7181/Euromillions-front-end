@@ -9,6 +9,7 @@ import { useAuth } from "./app/contexts/AuthContext";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { TicketService, TicketActivity, JackpotInfo } from "./lib/ticketService";
+import { getApiUrl } from "./lib/utils";
 
 /**
  * Crypto EuroMillions — Mobile-Only (Dark Trending-Style UI)
@@ -188,7 +189,7 @@ export default function CryptoEuroMillionsUI() {
   const testBackend = async () => {
     try {
       console.log('Testing backend connectivity...');
-      const response = await fetch('http://localhost:3001/auth/me', {
+      const response = await fetch(`${getApiUrl()}/auth/me`, {
         method: 'GET',
       });
       console.log('Backend connectivity check - Status:', response.status, response.status === 401 ? '(Expected - no token provided)' : '(Unexpected)');
@@ -222,7 +223,7 @@ export default function CryptoEuroMillionsUI() {
       }
       
       // Test token validity with auth endpoint
-      const testResponse = await fetch('http://localhost:3001/auth/me', {
+      const testResponse = await fetch(`${getApiUrl()}/auth/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -283,7 +284,7 @@ export default function CryptoEuroMillionsUI() {
   const fetchCountdown = async () => {
     try {
       console.log('Fetching countdown from backend...');
-      const response = await fetch('http://localhost:3001/countdown', {
+      const response = await fetch(`${getApiUrl()}/countdown`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -491,7 +492,7 @@ export default function CryptoEuroMillionsUI() {
       console.log('Using token for payment:', user.token);
       console.log('Authorization header:', `Bearer ${user.token}`);
       
-      const paymentResponse = await fetch('http://localhost:3001/payments/create-intent', {
+      const paymentResponse = await fetch(`${getApiUrl()}/payments/create-intent`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -545,7 +546,7 @@ export default function CryptoEuroMillionsUI() {
       
       // Step 3: Verify payment
       console.log('Verifying payment...');
-      const verifyResponse = await fetch('http://localhost:3001/payments/verify', {
+      const verifyResponse = await fetch(`${getApiUrl()}/payments/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -577,7 +578,7 @@ export default function CryptoEuroMillionsUI() {
       console.log('Ticket request data:', ticketRequestData);
       console.log('Ticket request JSON:', JSON.stringify(ticketRequestData));
       
-      const ticketResponse = await fetch('http://localhost:3001/tickets', {
+      const ticketResponse = await fetch(`${getApiUrl()}/tickets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

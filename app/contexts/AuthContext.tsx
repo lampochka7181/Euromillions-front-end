@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { PublicKey } from '@solana/web3.js';
+import { getApiUrl } from '@/lib/utils';
 
 interface User {
   walletAddress: string;
@@ -171,7 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Token being validated:', token);
       console.log('Authorization header:', `Bearer ${token}`);
       
-      const response = await fetch('http://localhost:3001/auth/me', {
+      const response = await fetch(`${getApiUrl()}/auth/me`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -301,7 +302,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.log('Request JSON:', JSON.stringify(requestData));
       
       // Step 1: Connect wallet
-      const connectResponse = await fetch('http://localhost:3001/auth/wallet-connect', {
+      const connectResponse = await fetch(`${getApiUrl()}/auth/wallet-connect`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -325,7 +326,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!token) {
         // If no token in connect response, try to register user
         console.log('No token in connect response, trying to register user...');
-        const registerResponse = await fetch('http://localhost:3001/auth/register', {
+        const registerResponse = await fetch(`${getApiUrl()}/auth/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -342,7 +343,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else if (registerResponse.status === 409) {
           // User already exists, try to get user info
           console.log('User already exists, getting user info...');
-          const userResponse = await fetch('http://localhost:3001/auth/me', {
+          const userResponse = await fetch(`${getApiUrl()}/auth/me`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

@@ -24,12 +24,24 @@ A mobile-first React/Next.js application for a crypto lottery game inspired by E
 npm install
 ```
 
-2. Start the development server:
+2. Create a `.env` file in the root directory:
+```bash
+# Backend API URL
+# For local development, this can be omitted (defaults to http://localhost:3001)
+# For production, set this to your deployed backend URL
+NEXT_PUBLIC_API_URL=https://your-backend-url.com
+
+# Supabase Configuration (Optional)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
+```
+
+3. Start the development server:
 ```bash
 npm run dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## Tech Stack
 
@@ -60,6 +72,20 @@ npm run dev
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+
+## Deployment
+
+### Vercel Deployment
+
+1. Push your code to GitHub
+2. Import the project in Vercel
+3. Add environment variables in Vercel dashboard:
+   - `NEXT_PUBLIC_API_URL` - Your production backend URL
+   - `NEXT_PUBLIC_SUPABASE_URL` - (Optional) Your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - (Optional) Your Supabase anonymous key
+4. Deploy!
+
+**Important**: Make sure to set `NEXT_PUBLIC_API_URL` to your production backend URL, otherwise the app will try to connect to `localhost:3001`.
 
 ## Notes
 
