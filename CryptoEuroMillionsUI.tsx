@@ -8,7 +8,7 @@ import { Sparkles, Clock, Check, Zap, List, ArrowLeft, LogOut } from "lucide-rea
 import { useAuth } from "./app/contexts/AuthContext";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { TicketService } from "./lib/ticketService";
+import { TicketService, TicketActivity, JackpotInfo } from "./lib/ticketService";
 
 /**
  * Crypto EuroMillions — Mobile-Only (Dark Trending-Style UI)
@@ -20,10 +20,10 @@ import { TicketService } from "./lib/ticketService";
  */
 
 // ---------- Utils ----------
-const range = (n) => Array.from({ length: n }, (_, i) => i + 1);
-const pickUnique = (pool, k) => {
+const range = (n: number): number[] => Array.from({ length: n }, (_, i) => i + 1);
+const pickUnique = (pool: number[], k: number): number[] => {
   const copy = [...pool];
-  const out = [];
+  const out: number[] = [];
   for (let i = 0; i < k; i++) {
     const idx = Math.floor(Math.random() * copy.length);
     out.push(copy[idx]);
@@ -31,10 +31,10 @@ const pickUnique = (pool, k) => {
   }
   return out;
 };
-const sortAsc = (arr) => [...arr].sort((a, b) => a - b);
+const sortAsc = (arr: number[]): number[] => [...arr].sort((a, b) => a - b);
 
 // Utility function to send SOL transaction
-const sendSolTransaction = async (wallet, connection, fromPublicKey, toPublicKey, amountSol) => {
+const sendSolTransaction = async (wallet: any, connection: any, fromPublicKey: PublicKey, toPublicKey: PublicKey, amountSol: number): Promise<string> => {
   try {
     console.log('Creating SOL transaction:', {
       from: fromPublicKey.toString(),
@@ -92,7 +92,7 @@ const EM_CONFIG = {
   jackpotLabel: "$12,340,000",
 };
 
-function NumberBall({ n, selected, onClick, disabled }) {
+function NumberBall({ n, selected, onClick, disabled }: { n: number; selected: boolean; onClick?: (n: number) => void; disabled?: boolean }) {
   return (
     <button
       onClick={() => !disabled && onClick?.(n)}
@@ -113,7 +113,7 @@ function NumberBall({ n, selected, onClick, disabled }) {
   );
 }
 
-function GridPicker({ title, max, needed, selected, onToggle }) {
+function GridPicker({ title, max, needed, selected, onToggle }: { title: string; max: number; needed: number; selected: number[]; onToggle: (n: number) => void }) {
   const nums = useMemo(() => range(max), [max]);
   const count = selected.length;
   return (
@@ -136,7 +136,7 @@ function GridPicker({ title, max, needed, selected, onToggle }) {
   );
 }
 
-function Countdown({ target }) {
+function Countdown({ target }: { target: number }) {
   const [mounted, setMounted] = useState(false);
   const [, setTick] = useState(0);
   
@@ -168,12 +168,13 @@ function Countdown({ target }) {
 }
 
 export default function CryptoEuroMillionsUI() {
-  const [main, setMain] = useState([]);
-  const [stars, setStars] = useState([]);
-  const [view, setView] = useState("home"); // "home" or "activity"
-  const [activities, setActivities] = useState([]); // {id,date,main,stars,price,txSig}
+  const [main, setMain] = useState<number[]>([]);
+  const [stars, setStars] = useState<number[]>([]);
+  const [view, setView] = useState<"home" | "activity">("home"); // "home" or "activity"
+  const [activities, setActivities] = useState<TicketActivity[]>([]); // {id,date,main,stars,price,txSig}
   const [mounted, setMounted] = useState(false);
-  const [jackpot, setJackpot] = useState(null);
+  const [jackpot, setJackpot] = useState<JackpotInfo | null>(null);
+  const [countdown, setCountdown] = useState<any>(null);
   
   const { user, isLoading, error, connectWallet, disconnect, wallet, connected, publicKey, setIsLoading } = useAuth();
   const { select, wallets } = useWallet();
@@ -278,6 +279,32 @@ export default function CryptoEuroMillionsUI() {
     }
   };
 
+  // Fetch countdown information from backend
+  const fetchCountdown = async () => {
+    try {
+      console.log('Fetching countdown from backend...');
+      const response = await fetch('http://localhost:3001/countdown', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        console.error('Countdown fetch failed:', response.status, response.statusText);
+        setCountdown(null);
+        return;
+      }
+
+      const countdownData = await response.json();
+      console.log('Successfully fetched countdown:', countdownData);
+      setCountdown(countdownData);
+    } catch (err) {
+      console.error('Failed to fetch countdown:', err);
+      setCountdown(null);
+    }
+  };
+
   // Fetch tickets when user is authenticated
   useEffect(() => {
     if (user) {
@@ -285,9 +312,10 @@ export default function CryptoEuroMillionsUI() {
     }
   }, [user]);
 
-  // Fetch jackpot on component mount
+  // Fetch jackpot and countdown on component mount
   useEffect(() => {
     fetchJackpot();
+    fetchCountdown();
   }, []);
 
   const drawTarget = useMemo(() => {
@@ -323,14 +351,14 @@ export default function CryptoEuroMillionsUI() {
   }, [user, wallet, connected, publicKey]);
   
 
-  function toggleMain(n) {
+  function toggleMain(n: number) {
     setMain((prev) => {
       if (prev.includes(n)) return prev.filter((x) => x !== n);
       if (prev.length >= EM_CONFIG.main.count) return prev;
       return [...prev, n];
     });
   }
-  function toggleStar(n) {
+  function toggleStar(n: number) {
     setStars((prev) => {
       if (prev.includes(n)) return prev.filter((x) => x !== n);
       if (prev.length >= EM_CONFIG.stars.count) return prev;
@@ -406,7 +434,7 @@ export default function CryptoEuroMillionsUI() {
     }
   }
 
-  function randomHex(len) {
+  function randomHex(len: number) {
     const chars = "abcdef0123456789";
     let out = "";
     for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
@@ -434,7 +462,7 @@ export default function CryptoEuroMillionsUI() {
     await playNowWithNumbers(main, stars);
   }
 
-  async function playNowWithNumbers(selectedMain, selectedStars) {
+  async function playNowWithNumbers(selectedMain: number[], selectedStars: number[]) {
     if (!user || needsReconnect) {
       handleConnectWallet();
       return;
@@ -584,9 +612,10 @@ export default function CryptoEuroMillionsUI() {
       };
       setActivities((prev) => [entry, ...prev]);
       
-      // Refresh jackpot to show updated pot amount
-      console.log('Refreshing jackpot after ticket purchase...');
+      // Refresh jackpot and countdown to show updated amounts
+      console.log('Refreshing jackpot and countdown after ticket purchase...');
       await fetchJackpot();
+      await fetchCountdown();
       
       alert(`Ticket purchased! You played 1 ticket • ${EM_CONFIG.ticketPriceSOL} SOL`);
       clearPick();
@@ -598,7 +627,7 @@ export default function CryptoEuroMillionsUI() {
     }
   }
 
-  function formatDate(iso) {
+  function formatDate(iso: string) {
     const d = new Date(iso);
     return d.toLocaleString();
   }
@@ -716,9 +745,20 @@ export default function CryptoEuroMillionsUI() {
           </div>
 
           <div className="mt-2 flex items-center justify-between">
-            <Countdown target={drawTarget} />
+            {countdown ? (
+              <div className="flex items-center gap-2 text-xs text-neutral-400">
+                <Clock className="h-3 w-3" />
+                Draw in {countdown.countdown.formatted}
+              </div>
+            ) : (
+              <Countdown target={drawTarget} />
+            )}
             <div className="rounded-full border border-neutral-800 bg-neutral-900 px-3 py-1 text-xs text-neutral-400">
-              {EM_CONFIG.scheduleLabel}
+              {countdown ? (
+                <>{countdown.next_draw.day} {countdown.next_draw.time}</>
+              ) : (
+                EM_CONFIG.scheduleLabel
+              )}
             </div>
           </div>
         </div>

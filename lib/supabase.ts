@@ -35,7 +35,7 @@ if (!isSupabaseConfigured()) {
 
 // Create a mock supabase client if not configured
 export const supabase = isSupabaseConfigured() 
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl as string, supabaseAnonKey as string)
   : {
       from: () => ({
         select: () => ({ data: [], error: null }),

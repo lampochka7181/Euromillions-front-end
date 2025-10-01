@@ -150,7 +150,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     try {
       const messageBytes = new TextEncoder().encode(message);
-      const signature = await walletToUse.adapter.signMessage!(messageBytes);
+      
+      // Check if adapter has signMessage method
+      if (!('signMessage' in walletToUse.adapter) || typeof (walletToUse.adapter as any).signMessage !== 'function') {
+        throw new Error('Wallet does not support message signing');
+      }
+      
+      const signature = await (walletToUse.adapter as any).signMessage(messageBytes);
       return Buffer.from(signature).toString('base64');
     } catch (err) {
       console.error('Sign message error:', err);
