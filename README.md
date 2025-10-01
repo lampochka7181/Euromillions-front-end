@@ -31,6 +31,19 @@ npm install
 # For production, set this to your deployed backend URL
 NEXT_PUBLIC_API_URL=https://your-backend-url.com
 
+# Solana Network Configuration
+# Options: 'mainnet-beta', 'devnet', 'testnet'
+# Defaults to 'mainnet-beta' if not set
+NEXT_PUBLIC_SOLANA_NETWORK=mainnet-beta
+
+# Solana RPC Endpoint (Recommended for Production)
+# For better performance and reliability, use a custom RPC provider:
+# - Helius: https://mainnet.helius-rpc.com/?api-key=YOUR_KEY
+# - QuickNode: https://your-endpoint.quiknode.pro/YOUR_KEY/
+# - Alchemy: https://solana-mainnet.g.alchemy.com/v2/YOUR_KEY
+# If not set, uses default public RPC (slow and rate-limited)
+NEXT_PUBLIC_SOLANA_RPC_URL=https://your-rpc-endpoint.com
+
 # Supabase Configuration (Optional)
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
@@ -80,12 +93,17 @@ npm run dev
 1. Push your code to GitHub
 2. Import the project in Vercel
 3. Add environment variables in Vercel dashboard:
-   - `NEXT_PUBLIC_API_URL` - Your production backend URL
+   - `NEXT_PUBLIC_API_URL` - Your production backend URL (required)
+   - `NEXT_PUBLIC_SOLANA_NETWORK` - Set to `mainnet-beta` for production (optional, defaults to mainnet-beta)
+   - `NEXT_PUBLIC_SOLANA_RPC_URL` - Your custom Solana RPC endpoint (highly recommended for production)
    - `NEXT_PUBLIC_SUPABASE_URL` - (Optional) Your Supabase project URL
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY` - (Optional) Your Supabase anonymous key
 4. Deploy!
 
-**Important**: Make sure to set `NEXT_PUBLIC_API_URL` to your production backend URL, otherwise the app will try to connect to `localhost:3001`.
+**Important Notes**:
+- Make sure to set `NEXT_PUBLIC_API_URL` to your production backend URL
+- For production, use a custom RPC endpoint (Helius, QuickNode, or Alchemy) to avoid transaction timeouts
+- The default public RPC is slow and rate-limited - not suitable for production use
 
 ## Notes
 
