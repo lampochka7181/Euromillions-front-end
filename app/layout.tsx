@@ -9,18 +9,6 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Crypto EuroMillions',
   description: 'Mobile-first crypto lottery app',
-  manifest: '/manifest.json',
-  themeColor: '#8B5CF6',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'black-translucent',
-    title: 'Crypto EuroMillions'
-  },
-  icons: {
-    icon: '/icon-192x192.png',
-    apple: '/icon-192x192.png'
-  }
 }
 
 export default function RootLayout({

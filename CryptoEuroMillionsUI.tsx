@@ -86,8 +86,8 @@ const sendSolTransaction = async (wallet: any, connection: any, fromPublicKey: P
 
 // ---------- Config ----------
 const EM_CONFIG = {
-  main: { count: 5, max: 30, label: "Numbers" },
-  stars: { count: 1, max: 10, label: "Lucky Star" },
+  main: { count: 4, max: 30, label: "Numbers" },
+  stars: { count: 1, max: 10, label: "Powerball" },
   ticketPriceSOL: 0.05,
   scheduleLabel: "Fri 20:00 UTC",
   jackpotLabel: "$12,340,000",
@@ -448,7 +448,7 @@ export default function CryptoEuroMillionsUI() {
       return;
     }
     if (!canPlay) {
-      alert("Select 5 numbers and 1 star or use Flash.");
+      alert("Select 4 numbers and 1 Powerball or use Flash.");
       return;
     }
     
@@ -801,7 +801,7 @@ export default function CryptoEuroMillionsUI() {
           </div>
         )}
         <div className="mb-3">
-          <div className="text-sm text-neutral-400">Pick numbers (5 + 1)</div>
+          <div className="text-sm text-neutral-400">Pick numbers (4 + 1 Powerball)</div>
         </div>
 
         <GridPicker
@@ -833,8 +833,9 @@ export default function CryptoEuroMillionsUI() {
           style={{ pointerEvents: 'auto' }}
         >
           <button
-            className="w-full text-base bg-purple-600 text-white hover:bg-purple-700 px-4 py-2 rounded-md"
+            className={`w-full text-base px-4 py-2 rounded-md ${(!user || needsReconnect) ? 'bg-purple-600 text-white hover:bg-purple-700' : (canPlay ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-neutral-800 text-neutral-500 cursor-not-allowed')}`}
             onClick={playNow}
+            disabled={user ? !canPlay : false}
             style={{ pointerEvents: 'auto' }}
           >
             {isLoading ? "Connecting..." : needsReconnect ? "Connect" : user ? `Play · ${EM_CONFIG.ticketPriceSOL} SOL` : "Connect"}
