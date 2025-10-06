@@ -10,7 +10,12 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { TicketService, TicketActivity, JackpotInfo } from "./lib/ticketService";
 import { getApiUrl } from "./lib/utils";
-import Confetti from "react-confetti";
+import dynamic from "next/dynamic";
+
+const Confetti = dynamic(() => import("react-confetti"), { 
+  ssr: false,
+  loading: () => null
+}) as any;
 
 /**
  * Crypto EuroMillions — Mobile-Only (Dark Trending-Style UI)
@@ -895,7 +900,7 @@ export default function CryptoEuroMillionsUI() {
       </AnimatePresence>
       
       {/* Confetti Animation */}
-      {showConfetti && (
+      {showConfetti && windowDimensions.width > 0 && windowDimensions.height > 0 && (
         <Confetti
           width={windowDimensions.width}
           height={windowDimensions.height}
