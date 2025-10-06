@@ -186,6 +186,7 @@ export default function CryptoEuroMillionsUI() {
   const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [solPrice, setSolPrice] = useState<number | null>(null);
   
   const { user, isLoading, error, connectWallet, disconnect, wallet, connected, publicKey, setIsLoading } = useAuth();
   const { select, wallets } = useWallet();
@@ -294,6 +295,24 @@ export default function CryptoEuroMillionsUI() {
     }
   };
 
+  // Fetch SOL price in USD
+  const fetchSolPrice = async () => {
+    try {
+      console.log('Fetching SOL price...');
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+      const data = await response.json();
+      const price = data.solana?.usd;
+      if (price) {
+        setSolPrice(price);
+        console.log('SOL price fetched:', price);
+      }
+    } catch (err) {
+      console.error('Failed to fetch SOL price:', err);
+      // Don't set a fallback price - will show SOL amount instead
+      setSolPrice(null);
+    }
+  };
+
   // Fetch jackpot information from backend
   const fetchJackpot = async () => {
     try {
@@ -340,10 +359,11 @@ export default function CryptoEuroMillionsUI() {
     }
   }, [user]);
 
-  // Fetch jackpot and countdown on component mount
+  // Fetch jackpot, countdown, and SOL price on component mount
   useEffect(() => {
     fetchJackpot();
     fetchCountdown();
+    fetchSolPrice();
   }, []);
 
   const drawTarget = useMemo(() => {
@@ -456,6 +476,22 @@ export default function CryptoEuroMillionsUI() {
   const closeSuccessModal = () => {
     setShowSuccessModal(false);
     setSuccessMessage("");
+  };
+
+  // Format USD amount
+  const formatUSD = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  // Convert SOL to USD
+  const convertSolToUSD = (solAmount: number) => {
+    if (!solPrice) return null;
+    return solAmount * solPrice;
   };
 
   async function handleConnectWallet() {
@@ -789,7 +825,7 @@ export default function CryptoEuroMillionsUI() {
             {jackpot ? (
               <>
                 <span className="text-yellow-400">
-                  {jackpot.pot.current_amount.toFixed(2)} SOL
+                  {solPrice ? formatUSD(convertSolToUSD(jackpot.pot.current_amount) || 0) : `${jackpot.pot.current_amount.toFixed(2)} SOL`}
                 </span>
                 <span className="text-neutral-400 ml-2">Jackpot</span>
               </>
