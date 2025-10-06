@@ -7,8 +7,8 @@ import { AuthProvider } from './contexts/AuthContext'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Crypto EuroMillions',
-  description: 'Mobile-first crypto lottery app',
+  title: 'MegaDraw',
+  description: 'Solana native megajackpot draw',
 }
 
 export default function RootLayout({
