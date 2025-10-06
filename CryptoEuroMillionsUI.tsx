@@ -448,7 +448,9 @@ export default function CryptoEuroMillionsUI() {
       return;
     }
     if (!canPlay) {
-      alert("Select 4 numbers and 1 Powerball or use Flash.");
+      // Instead of showing an alert, use the Flash button functionality to auto-select numbers
+      console.log('User authenticated but no numbers selected, using Flash pick...');
+      await flashPickAndBuy();
       return;
     }
     
@@ -833,12 +835,12 @@ export default function CryptoEuroMillionsUI() {
           style={{ pointerEvents: 'auto' }}
         >
           <button
-            className={`w-full text-base px-4 py-2 rounded-md ${(!user || needsReconnect) ? 'bg-purple-600 text-white hover:bg-purple-700' : (canPlay ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-neutral-800 text-neutral-500 cursor-not-allowed')}`}
+            className={`w-full text-base px-4 py-2 rounded-md ${(!user || needsReconnect) ? 'bg-purple-600 text-white hover:bg-purple-700' : (canPlay ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-600 text-white hover:bg-purple-700')}`}
             onClick={playNow}
-            disabled={user ? !canPlay : false}
+            disabled={false}
             style={{ pointerEvents: 'auto' }}
           >
-            {isLoading ? "Connecting..." : needsReconnect ? "Connect" : user ? `Play · ${EM_CONFIG.ticketPriceSOL} SOL` : "Connect"}
+            {isLoading ? "Connecting..." : needsReconnect ? "Connect" : user ? (canPlay ? `Play · ${EM_CONFIG.ticketPriceSOL} SOL` : `Select ${EM_CONFIG.main.count} numbers + ${EM_CONFIG.stars.count} Powerball`) : "Connect"}
           </button>
         </div>
       </AnimatePresence>
