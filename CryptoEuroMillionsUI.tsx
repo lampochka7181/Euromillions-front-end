@@ -10,6 +10,7 @@ import { useWallet, useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { TicketService, TicketActivity, JackpotInfo } from "./lib/ticketService";
 import { getApiUrl } from "./lib/utils";
+import Confetti from "react-confetti";
 
 /**
  * Crypto EuroMillions — Mobile-Only (Dark Trending-Style UI)
@@ -176,6 +177,10 @@ export default function CryptoEuroMillionsUI() {
   const [mounted, setMounted] = useState(false);
   const [jackpot, setJackpot] = useState<JackpotInfo | null>(null);
   const [countdown, setCountdown] = useState<any>(null);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [windowDimensions, setWindowDimensions] = useState({ width: 0, height: 0 });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
   
   const { user, isLoading, error, connectWallet, disconnect, wallet, connected, publicKey, setIsLoading } = useAuth();
   const { select, wallets } = useWallet();
@@ -183,6 +188,23 @@ export default function CryptoEuroMillionsUI() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // Set initial window dimensions
+    setWindowDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+    
+    // Handle window resize
+    const handleResize = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   // Test backend connectivity
@@ -412,6 +434,25 @@ export default function CryptoEuroMillionsUI() {
     setStars([]);
   }
 
+  const triggerConfetti = () => {
+    setShowConfetti(true);
+    // Auto-hide confetti after 5 seconds
+    setTimeout(() => {
+      setShowConfetti(false);
+    }, 5000);
+  };
+
+  const showSuccessPopup = (message: string) => {
+    setSuccessMessage(message);
+    setShowSuccessModal(true);
+    triggerConfetti();
+  };
+
+  const closeSuccessModal = () => {
+    setShowSuccessModal(false);
+    setSuccessMessage("");
+  };
+
   async function handleConnectWallet() {
     try {
       console.log('Available wallets:', wallets.map(w => w.adapter.name));
@@ -622,7 +663,7 @@ export default function CryptoEuroMillionsUI() {
       await fetchJackpot();
       await fetchCountdown();
       
-      alert(`Ticket purchased! You played 1 ticket • ${EM_CONFIG.ticketPriceSOL} SOL`);
+      showSuccessPopup(`Ticket purchased! You played 1 ticket • ${EM_CONFIG.ticketPriceSOL} SOL`);
       clearPick();
     } catch (err) {
       console.error('Purchase failed:', err);
@@ -851,6 +892,64 @@ export default function CryptoEuroMillionsUI() {
             {isLoading ? "Connecting..." : needsReconnect ? "Connect" : user ? (canPlay ? `Play · ${EM_CONFIG.ticketPriceSOL} SOL` : `Select ${EM_CONFIG.main.count} numbers + ${EM_CONFIG.stars.count} Powerball`) : "Connect"}
           </button>
         </div>
+      </AnimatePresence>
+      
+      {/* Confetti Animation */}
+      {showConfetti && (
+        <Confetti
+          width={windowDimensions.width}
+          height={windowDimensions.height}
+          recycle={false}
+          numberOfPieces={200}
+          gravity={0.3}
+          initialVelocityY={20}
+          colors={['#8B5CF6', '#A855F7', '#C084FC', '#DDD6FE', '#F3E8FF', '#FEF3C7', '#FDE047', '#FACC15']}
+        />
+      )}
+
+      {/* Custom Success Modal */}
+      <AnimatePresence>
+        {showSuccessModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+            onClick={closeSuccessModal}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.8, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="relative mx-4 max-w-sm w-full bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Success Icon */}
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <Check className="w-8 h-8 text-green-400" />
+                </div>
+              </div>
+              
+              {/* Success Message */}
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-semibold text-white mb-2">Success!</h3>
+                <p className="text-neutral-300 text-sm leading-relaxed">
+                  {successMessage}
+                </p>
+              </div>
+              
+              {/* OK Button */}
+              <Button
+                onClick={closeSuccessModal}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 rounded-lg transition-colors"
+              >
+                OK
+              </Button>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
