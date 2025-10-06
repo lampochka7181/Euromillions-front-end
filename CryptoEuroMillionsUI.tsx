@@ -380,29 +380,31 @@ export default function CryptoEuroMillionsUI() {
       return;
     }
     
-    // Auto-select random numbers
-    const m = pickUnique(range(EM_CONFIG.main.max), EM_CONFIG.main.count);
-    const s = pickUnique(range(EM_CONFIG.stars.max), EM_CONFIG.stars.count);
-    const selectedMain = sortAsc(m);
-    const selectedStars = sortAsc(s);
-    
-    // Update UI state
-    setMain(selectedMain);
-    setStars(selectedStars);
-    
-    console.log('Flash pick selected:', {
-      main: selectedMain,
-      stars: selectedStars
-    });
-    
-    // Call playNow with the selected numbers directly (bypass state check)
-    setTimeout(async () => {
-      try {
-        await playNowWithNumbers(selectedMain, selectedStars);
-      } catch (err) {
-        console.error('Flash pick and buy failed:', err);
-      }
-    }, 100);
+    try {
+      setIsLoading(true);
+      
+      // Auto-select random numbers
+      const m = pickUnique(range(EM_CONFIG.main.max), EM_CONFIG.main.count);
+      const s = pickUnique(range(EM_CONFIG.stars.max), EM_CONFIG.stars.count);
+      const selectedMain = sortAsc(m);
+      const selectedStars = sortAsc(s);
+      
+      // Update UI state
+      setMain(selectedMain);
+      setStars(selectedStars);
+      
+      console.log('Flash pick selected:', {
+        main: selectedMain,
+        stars: selectedStars
+      });
+      
+      // Immediately proceed with purchase
+      await playNowWithNumbers(selectedMain, selectedStars);
+    } catch (err) {
+      console.error('Flash pick and buy failed:', err);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   function clearPick() {
@@ -711,8 +713,14 @@ export default function CryptoEuroMillionsUI() {
               <span className="text-sm text-neutral-400">Global Mega Jackpot</span>
             </div>
             <div className="flex items-center gap-2">
-              <Button size="sm" className="bg-purple-600 text-white" onClick={flashPickAndBuy}>
-                <Zap className="mr-1 h-4 w-4" /> Flash · {EM_CONFIG.ticketPriceSOL} SOL
+              <Button 
+                size="sm" 
+                className="bg-purple-600 text-white hover:bg-purple-700 disabled:bg-neutral-800 disabled:text-neutral-500" 
+                onClick={flashPickAndBuy}
+                disabled={isLoading}
+              >
+                <Zap className="mr-1 h-4 w-4" /> 
+                {isLoading ? "Processing..." : `Flash · ${EM_CONFIG.ticketPriceSOL} SOL`}
               </Button>
               <Button size="icon" variant="ghost" onClick={() => setView("activity")}>
                 <List className="h-5 w-5 text-neutral-400" />
@@ -791,7 +799,7 @@ export default function CryptoEuroMillionsUI() {
         )}
         {mounted && wallets.length > 0 && !wallet && (
           <div className="mb-4 p-3 bg-blue-900/20 border border-blue-800 rounded-lg text-blue-300 text-sm">
-            Wallets detected: {wallets.map(w => w.adapter.name).join(', ')}. Please select a wallet to connect.
+            Connect wallet to start playing.
           </div>
         )}
         {mounted && user && (
